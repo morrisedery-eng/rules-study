@@ -1,0 +1,634 @@
+<title>Florida Child Care Rules Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a licensing clipboard — day tabs across the top, a session timer strip, then the lesson sheet with EN | HE columns */
+:root{
+  --bg:#f3f6f4; --sheet:#ffffff; --ink:#17302a; --muted:#5b6f69; --line:#d5e0dc;
+  --accent:#0f7a63; --accent-ink:#ffffff; --mark:#ffe08a; --mark-ink:#3d2e00;
+  --good:#1f8a4c; --bad:#b8402f; --chip:#e6efeb;
+  --display:"Secular One","Rubik",system-ui,sans-serif;
+  --body:"Rubik",system-ui,"Segoe UI",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1916; --sheet:#16231f; --ink:#e3eeea; --muted:#9bb0a9; --line:#2a3b36;
+  --accent:#3cc29f; --accent-ink:#06231b; --mark:#5a4a12; --mark-ink:#ffe9a8;
+  --good:#5bd18b; --bad:#ff8a76; --chip:#1f302b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1916; --sheet:#16231f; --ink:#e3eeea; --muted:#9bb0a9; --line:#2a3b36;
+  --accent:#3cc29f; --accent-ink:#06231b; --mark:#5a4a12; --mark-ink:#ffe9a8;
+  --good:#5bd18b; --bad:#ff8a76; --chip:#1f302b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(1.6rem,4vw,2.3rem)}
+h2{font-size:1.45rem}
+h3{font-size:1.05rem;letter-spacing:.02em}
+.label{font-family:var(--mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.he{font-family:"Rubik",system-ui,Arial,sans-serif}
+header{display:grid;gap:10px}
+.sub{color:var(--muted);max-width:68ch}
+.topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--sheet)}
+.seg button{border:0;background:none;color:var(--ink);padding:7px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,.daytab:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.progress{font-family:var(--mono);font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.days{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.daytab{border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:10px;padding:8px 4px;
+  font:inherit;cursor:pointer;display:grid;gap:2px;justify-items:center;min-width:0}
+.daytab .n{font-family:var(--display);font-size:1.2rem;line-height:1}
+.daytab .s{font-size:.66rem;color:var(--muted);font-family:var(--mono)}
+.daytab[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.daytab.done{background:var(--chip)}
+.daytab.done .s{color:var(--good)}
+@media (max-width:640px){.days{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.timer{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px}
+.timer-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.clock{font-family:var(--mono);font-size:2rem;font-variant-numeric:tabular-nums;font-weight:500}
+.blocks{display:grid;grid-template-columns:1fr 3fr 1fr 1fr;gap:4px}
+.blk{border-radius:6px;padding:6px 8px;background:var(--chip);font-size:.78rem;min-width:0;position:relative;overflow:hidden}
+.blk .fill{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.25;width:0}
+.blk span{position:relative}
+.blk.on{outline:2px solid var(--accent)}
+@media (max-width:560px){.blocks{grid-template-columns:1fr 1fr}}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:8px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+.btn.ghost{background:none;color:var(--accent)}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,28px);display:grid;gap:22px}
+.sec{display:grid;gap:10px}
+.sec-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}
+.mins{font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+.bi{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+.bi>*{min-width:0}
+.bi .he{direction:rtl;text-align:right}
+body.m-en .he,body.m-he .en{display:none}
+body.m-en .bi,body.m-he .bi{grid-template-columns:1fr}
+@media (max-width:640px){.bi{grid-template-columns:1fr}.bi .he{border-top:1px dashed var(--line);padding-top:4px}}
+ul.points{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+ul.points li{padding:10px 12px;border-radius:10px;background:var(--bg)}
+mark{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.cite{font-family:var(--mono);font-size:.72rem;color:var(--muted);display:block;margin-top:4px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:start}
+th{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);cursor:pointer;min-height:110px;display:grid;align-content:center;gap:6px;text-align:center;font:inherit;color:var(--ink)}
+.card .front{font-weight:600}
+.card .back{display:none;color:var(--muted);font-size:.92rem}
+.card.flip .back{display:block}
+.card.flip{border-color:var(--accent)}
+.q{display:grid;gap:8px;padding:12px;border-radius:12px;background:var(--bg)}
+.opts{display:grid;gap:6px}
+.opt{border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;text-align:start;cursor:pointer;display:grid;gap:2px}
+.opt.right{border-color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.opt.wrong{border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.ex{font-size:.9rem;color:var(--muted)}
+.score{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.note{font-size:.85rem;color:var(--muted);border-left:3px solid var(--mark);padding-left:10px}
+.note .he{border-left:0}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mini{border:1px solid var(--line);background:var(--sheet);color:var(--accent);border-radius:999px;padding:3px 10px;font:inherit;font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.mini svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.mini.speaking{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;
+  border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.18);display:inline-flex;gap:8px;align-items:center}
+.fab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+.helper{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;
+  width:min(420px,calc(100vw - 32px));height:min(620px,calc(100vh - 32px));background:var(--sheet);border:1px solid var(--line);
+  border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
+@media (max-width:560px){.helper{right:0;left:0;bottom:0;width:100%;height:85vh;border-radius:16px 16px 0 0;
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}}
+.h-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--chip)}
+.h-head h3{font-size:1.1rem}
+.h-body{overflow-y:auto;padding:12px 14px;display:grid;gap:10px;align-content:start}
+.msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;max-width:92%;min-width:0;overflow-wrap:anywhere}
+.msg.me{background:var(--accent);color:var(--accent-ink);justify-self:end}
+.msg.bot{background:var(--bg);justify-self:start}
+.msg[dir="rtl"]{text-align:right}
+.msg .tools{margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.h-foot{border-top:1px solid var(--line);padding:10px 12px;display:grid;gap:8px}
+.h-row{display:flex;gap:8px}
+.h-row textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;background:var(--bg);color:var(--ink);min-height:44px;max-height:120px}
+.h-note{font-size:.78rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="label">Florida DCF · Child Care Facility Rules &amp; Regulations (RNRF)</span>
+    <div class="bi">
+      <h1 class="en">Rules &amp; Regs: 10-Day Study Plan</h1>
+      <h1 class="he" lang="he">חוקים ותקנות: תוכנית לימוד ל-10 ימים</h1>
+      <p class="en sub">One hour a day. Each session: 10 min review, 30 min new material, 10 min flashcards, 10 min quiz.</p>
+      <p class="he sub" lang="he">שעה אחת ביום. כל מפגש: 10 דק׳ חזרה, 30 דק׳ חומר חדש, 10 דק׳ כרטיסיות, 10 דק׳ בוחן.</p>
+    </div>
+    <div class="topbar">
+      <div class="seg" role="group" aria-label="Language">
+        <button id="m-both" data-m="both" aria-pressed="true">EN | עב</button>
+        <button id="m-en" data-m="en" aria-pressed="false">English</button>
+        <button id="m-he" data-m="he" aria-pressed="false">עברית</button>
+      </div>
+      <span class="progress" id="prog"></span>
+    </div>
+    <nav class="days" id="days" aria-label="Days"></nav>
+  </header>
+
+  <section class="timer" aria-label="Session timer">
+    <div class="timer-row">
+      <div>
+        <span class="label">Session timer · טיימר</span>
+        <div class="clock" id="clock">60:00</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="tstart">Start · התחל</button>
+        <button class="btn ghost" id="treset">Reset · אפס</button>
+      </div>
+    </div>
+    <div class="blocks" id="blocks"></div>
+  </section>
+
+  <main class="sheet" id="sheet"></main>
+
+  <p class="note"><span class="en">Based on Florida Statutes 402.26–402.319, Rule 65C-22 F.A.C. and the DCF Child Care Facility Handbook (Oct 2021 edition posted by DCF). DCF has since been revising the handbook, so check any number you will be tested on against the version your course uses. Miami-Dade is licensed directly by DCF.</span>
+  <span class="he" lang="he" dir="rtl" style="display:block">מבוסס על חוקי פלורידה 402.26–402.319, תקנה 65C-22 ומדריך מתקני הטיפול בילדים של DCF (מהדורת אוקטובר 2021). DCF מעדכן את המדריך, לכן בדקו כל מספר מול הגרסה שבקורס שלכם. מיאמי-דייד מפוקחת ישירות על ידי DCF.</span></p>
+</div>
+
+<button class="fab" id="fab" aria-controls="helper" aria-expanded="false">
+  <svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h6"/></svg><span>Study helper · עוזר לימוד</span>
+</button>
+<section class="helper" id="helper" hidden aria-label="Study helper">
+  <div class="h-head">
+    <div><h3>Study helper · עוזר לימוד</h3><span class="h-note" id="h-day"></span></div>
+    <div style="display:flex;gap:6px">
+      <button class="mini" id="h-stop" title="Stop reading">Stop · עצור</button>
+      <button class="mini" id="h-close" title="Close">Close · סגור</button>
+    </div>
+  </div>
+  <div class="h-body" id="h-body" aria-live="polite"></div>
+  <div class="h-foot">
+    <div class="chips" id="h-chips"></div>
+    <form class="h-row" id="h-form">
+      <textarea id="h-input" rows="1" placeholder="Ask anything… · שאלו כל דבר…"></textarea>
+      <button class="btn" id="h-send" type="submit">Ask · שאל</button>
+    </form>
+    <p class="h-note" style="margin:0">To speak instead of typing, tap the box and use your keyboard's microphone (phone), or press Fn twice (Mac) or Windows + H (PC). For Hebrew, switch the keyboard to Hebrew first. · לדיבור במקום הקלדה: הקישו בתיבה ולחצו על המיקרופון במקלדת (טלפון), או Fn פעמיים (מק) או Windows + H (מחשב). לעברית, החליפו קודם את המקלדת לעברית.</p>
+    <label class="h-note"><input type="checkbox" id="h-auto"> Read answers aloud · הקראת תשובות בקול</label>
+  </div>
+</section>
+
+<script>
+const B=(en,he)=>({en,he});
+const DAYS=[
+{t:B("The big picture: who makes the rules","התמונה הגדולה: מי קובע את הכללים"),
+ s:B("Laws, rules, handbook","חוקים, תקנות, מדריך"),
+ pts:[
+ B("Florida's child care rules come in three layers: the <mark>Florida Statutes</mark> (laws passed by the Legislature, sections 402.26–402.319), the <mark>Florida Administrative Code, Chapter 65C-22</mark> (rules written by DCF), and the <mark>Child Care Facility Handbook</mark>, which is incorporated into rule 65C-22.001 and has the force of rule.",
+   "חוקי הטיפול בילדים בפלורידה בנויים משלוש שכבות: <mark>חוקי פלורידה</mark> (חקיקה של בית המחוקקים, סעיפים 402.26–402.319), <mark>הקוד המנהלי של פלורידה, פרק 65C-22</mark> (תקנות שכתב DCF), ו<mark>מדריך מתקני הטיפול בילדים</mark>, שמשולב בתקנה 65C-22.001 ולכן מחייב כמו תקנה."),
+ B("A <mark>child care facility</mark> is any center or arrangement that cares for <mark>more than five children unrelated to the operator</mark> and receives a payment, fee or grant for any of them, whether or not it operates for profit. (s. 402.302, F.S.)",
+   "<mark>מתקן טיפול בילדים</mark> הוא כל מרכז או הסדר שמטפל ב<mark>יותר מחמישה ילדים שאינם קרובי משפחה של המפעיל</mark> ומקבל תשלום, דמי שירות או מענק עבור מי מהם, בין אם הוא למטרות רווח ובין אם לא."),
+ B("“Child care” means care, protection and supervision of a child for <mark>less than 24 hours a day</mark> on a regular basis, supplementing parental care, for which payment is made.",
+   "”טיפול בילדים“ פירושו טיפול, הגנה והשגחה על ילד <mark>פחות מ-24 שעות ביממה</mark> באופן קבוע, כהשלמה לטיפול ההורים, תמורת תשלום."),
+ B("Every facility needs a license, <mark>renewed annually</mark>, unless exempt by statute. All fines must be paid before a license is issued.",
+   "כל מתקן חייב ברישיון <mark>שמתחדש מדי שנה</mark>, אלא אם הוא פטור בחוק. יש לשלם את כל הקנסות לפני הנפקת רישיון."),
+ B("DCF licenses programs in 62 of 67 counties. Five counties use a <mark>local licensing agency</mark>: Broward, Hillsborough, Palm Beach, Pinellas and Sarasota. Local standards must meet or exceed the state's.",
+   "DCF מעניק רישיונות ב-62 מתוך 67 מחוזות. חמישה מחוזות משתמשים ב<mark>רשות רישוי מקומית</mark>: ברוורד, הילסבורו, פאלם ביץ׳, פינלס וסרסוטה. הסטנדרטים המקומיים חייבים להיות שווים או מחמירים מאלה של המדינה."),
+ B("The RNRF course is 6 hours and is the first of the five Part I courses DCF recommends. Its four goals: know your role under the regulations, know the specific statutes and codes, understand how the <mark>Americans with Disabilities Act (ADA)</mark> applies, and practice professionalism.",
+   "קורס RNRF נמשך 6 שעות והוא הראשון מחמשת קורסי חלק א׳ ש-DCF ממליץ עליהם. ארבע מטרותיו: להבין את תפקידכם לפי התקנות, להכיר את החוקים והתקנות, להבין כיצד <mark>חוק האמריקאים עם מוגבלויות (ADA)</mark> חל על טיפול בילדים, ולנהוג במקצועיות.")],
+ cards:[B("F.S. 402.26–402.319","Florida Statutes: the child care law · חוקי פלורידה: חוק הטיפול בילדים"),B("65C-22, F.A.C.","DCF's child care rule · תקנת DCF לטיפול בילדים"),B("Facility = more than __ unrelated children","5 · חמישה (יותר מ-5)"),B("License renewal","Every year · כל שנה"),B("Local licensing counties","Broward, Hillsborough, Palm Beach, Pinellas, Sarasota")],
+ quiz:[
+ {q:B("Which document is incorporated into rule 65C-22.001?","איזה מסמך משולב בתקנה 65C-22.001?"),o:[B("The Child Care Facility Handbook","מדריך מתקני הטיפול בילדים"),B("The ADA","חוק ה-ADA"),B("The USDA MyPlate","MyPlate של USDA"),B("The parent handbook","מדריך ההורים")],a:0,x:B("The Handbook is incorporated by reference, so it carries the force of rule.","המדריך משולב בהפניה ולכן מחייב כתקנה.")},
+ {q:B("A center cares for 6 unrelated children for a fee. Is it a child care facility?","מרכז מטפל ב-6 ילדים שאינם קרובים תמורת תשלום. האם זה מתקן טיפול בילדים?"),o:[B("Yes","כן"),B("No, it must be 10+","לא, צריך 10 ומעלה"),B("Only if it is for-profit","רק אם למטרת רווח"),B("Only if it has infants","רק אם יש תינוקות")],a:0,x:B("More than five unrelated children plus payment = facility, profit or not.","יותר מחמישה ילדים לא קרובים + תשלום = מתקן, עם או בלי רווח.")},
+ {q:B("How often is a facility license renewed?","באיזו תדירות מחדשים רישיון?"),o:[B("Annually","מדי שנה"),B("Every 2 years","כל שנתיים"),B("Every 5 years","כל 5 שנים"),B("Never","אף פעם")],a:0,x:B("s. 402.308, F.S.: licenses are renewed annually.","סעיף 402.308: הרישיון מתחדש מדי שנה.")},
+ {q:B("Who licenses child care in Miami-Dade County?","מי מעניק רישיון בטיפול בילדים במחוז מיאמי-דייד?"),o:[B("DCF","DCF"),B("A local agency","רשות מקומית"),B("The school district","מחוז בתי הספר"),B("The fire marshal","מכבי האש")],a:0,x:B("Only Broward, Hillsborough, Palm Beach, Pinellas and Sarasota use local agencies.","רק ברוורד, הילסבורו, פאלם ביץ׳, פינלס וסרסוטה משתמשים ברשות מקומית.")}]},
+
+{t:B("Personnel: age, screening, fitness","אנשי צוות: גיל, בדיקות רקע, כשירות"),
+ s:B("Who may work","מי רשאי לעבוד"),
+ pts:[
+ B("Staff must be at least <mark>16</mark> to work without direct supervision. A person at least <mark>21</mark> must be in charge and on the premises at all times the program is open.",
+   "עובד חייב להיות לפחות בן <mark>16</mark> כדי לעבוד ללא השגחה ישירה. אדם בן <mark>21</mark> לפחות חייב להיות אחראי ולהימצא במקום בכל שעות הפעילות."),
+ B("The director (operator) must be at least 21, meet all screening and training requirements and hold an <mark>active Director Credential</mark> before a license is issued.",
+   "המנהל (המפעיל) חייב להיות לפחות בן 21, לעמוד בכל דרישות הבדיקה וההכשרה ולהחזיק ב<mark>תעודת מנהל פעילה</mark> לפני הנפקת רישיון."),
+ B("Everyone needs a <mark>Level 2 background screening</mark>: FBI and FDLE fingerprint checks, sexual predator/offender registry, and the child abuse and neglect registry of every state lived in during the <mark>past five years</mark>. An employment history check is also required.",
+   "כל עובד חייב ב<mark>בדיקת רקע ברמה 2</mark>: בדיקת טביעות אצבע ב-FBI וב-FDLE, מאגר עברייני מין, ומאגר התעללות והזנחה בילדים בכל מדינה שבה גר ב<mark>חמש השנים האחרונות</mark>. נדרשת גם בדיקת היסטוריה תעסוקתית."),
+ B("Re-screening happens <mark>every five years</mark> after the initial screening.",
+   "בדיקה חוזרת מתבצעת <mark>כל חמש שנים</mark> מהבדיקה הראשונה."),
+ B("No one may work while using or under the influence of narcotics, alcohol or other impairing drugs. Firearms and weapons are prohibited on the premises (except law enforcement).",
+   "אסור לעבוד תחת השפעת סמים, אלכוהול או תרופות הפוגעות בתפקוד. נשק אסור בשטח המתקן (למעט אנשי אכיפת החוק)."),
+ B("Out-of-state offenses that would be disqualifying in Florida are treated as disqualifying.",
+   "עבירות ממדינות אחרות שהיו פוסלות בפלורידה נחשבות פוסלות גם כאן.")],
+ cards:[B("Minimum age, unsupervised staff","16"),B("Minimum age, person in charge","21"),B("Level 2 screening includes","FBI + FDLE + registries · טביעות אצבע ומאגרים"),B("Abuse registry look-back","5 years · 5 שנים"),B("Re-screening","Every 5 years · כל 5 שנים")],
+ quiz:[
+ {q:B("Minimum age to work without direct supervision?","הגיל המינימלי לעבודה ללא השגחה ישירה?"),o:[B("16","16"),B("18","18"),B("21","21"),B("14","14")],a:0,x:B("16; the person in charge must be 21.","16; האחראי חייב להיות בן 21.")},
+ {q:B("Which is NOT part of Level 2 screening?","מה אינו חלק מבדיקה ברמה 2?"),o:[B("Credit score check","בדיקת דירוג אשראי"),B("FBI fingerprints","טביעות אצבע ב-FBI"),B("Sex offender registry","מאגר עברייני מין"),B("Abuse registry","מאגר התעללות")],a:0,x:B("Credit checks are not part of it.","בדיקת אשראי אינה חלק מהבדיקה.")},
+ {q:B("Re-screening is required every…","בדיקה חוזרת נדרשת כל…"),o:[B("5 years","5 שנים"),B("Year","שנה"),B("3 years","3 שנים"),B("10 years","10 שנים")],a:0,x:B("Every five years.","כל חמש שנים.")},
+ {q:B("What must the director hold before a license is issued?","במה חייב המנהל להחזיק לפני הנפקת רישיון?"),o:[B("An active Director Credential","תעודת מנהל פעילה"),B("A master's degree","תואר שני"),B("A CDL license","רישיון נהיגה מסחרי"),B("Nothing extra","שום דבר נוסף")],a:0,x:B("The Director Credential is required.","נדרשת תעודת מנהל.")}]},
+
+{t:B("Training and credentials","הכשרה ותעודות"),
+ s:B("40 hours & more","40 שעות ועוד"),
+ pts:[
+ B("All child care personnel must complete DCF's <mark>40-hour introductory training</mark> (Part I: 30 hours, Part II: 10 hours) and pass the competency exams, or qualify for an educational exemption.",
+   "כל אנשי הצוות חייבים להשלים את <mark>הכשרת המבוא של 40 שעות</mark> של DCF (חלק א׳: 30 שעות, חלק ב׳: 10 שעות) ולעבור את מבחני הכשירות, או לקבל פטור על בסיס השכלה."),
+ B("Training must <mark>begin within 90 days</mark> of starting work in child care and be <mark>completed within one year</mark> of the date training began.",
+   "ההכשרה חייבת <mark>להתחיל תוך 90 יום</mark> מתחילת העבודה ולהסתיים <mark>תוך שנה</mark> מתחילת ההכשרה."),
+ B("Also required: <mark>5 hours</mark> of early literacy and language training (birth to 5), and <mark>10 hours</mark> (1 CEU) of annual in-service training.",
+   "נדרש גם: <mark>5 שעות</mark> הכשרה באוריינות ושפה מוקדמת (לידה עד 5), ו-<mark>10 שעות</mark> (CEU אחד) של השתלמות שנתית."),
+ B("If the facility cares for infants, staff take approved <mark>safe sleep / shaken baby syndrome</mark> training.",
+   "אם המתקן מטפל בתינוקות, הצוות עובר הכשרה מאושרת ב<mark>שינה בטוחה / תסמונת התינוק המטולטל</mark>."),
+ B("At least one staff member with valid in-person <mark>first aid and pediatric CPR</mark> must be on site whenever children are in care.",
+   "חייב להיות במקום לפחות איש צוות אחד עם תעודה בתוקף ב<mark>עזרה ראשונה והחייאת ילדים</mark> בכל זמן שיש ילדים."),
+ B("At least one person with a valid <mark>staff credential</mark> must be on site for <mark>every 20 children</mark> in care.",
+   "חייב להיות במקום אדם אחד עם <mark>תעודת צוות</mark> בתוקף על כל <mark>20 ילדים</mark>."),
+ B("1 CEU = 10 contact hours. A CEU assessment needs a score of 80% or higher.",
+   "יחידת CEU אחת = 10 שעות לימוד. מבחן CEU דורש ציון של 80% ומעלה.")],
+ cards:[B("Intro training total","40 hours (30 + 10)"),B("Start training within","90 days · 90 יום"),B("Finish training within","1 year · שנה"),B("Annual in-service","10 hours · 10 שעות"),B("Credentialed staff ratio","1 per 20 children · 1 לכל 20")],
+ quiz:[
+ {q:B("Training must begin within how many days of employment?","תוך כמה ימים מתחילת העבודה חייבת ההכשרה להתחיל?"),o:[B("90","90"),B("30","30"),B("60","60"),B("180","180")],a:0,x:B("90 days.","90 יום.")},
+ {q:B("Annual in-service hours?","כמה שעות השתלמות שנתית?"),o:[B("10","10"),B("5","5"),B("20","20"),B("40","40")],a:0,x:B("10 clock hours or 1 CEU.","10 שעות או CEU אחד.")},
+ {q:B("A center has 60 children. Minimum staff with a credential on site?","במרכז 60 ילדים. כמה בעלי תעודת צוות לפחות?"),o:[B("3","3"),B("1","1"),B("2","2"),B("6","6")],a:0,x:B("One per 20 children: 60 ÷ 20 = 3.","אחד לכל 20 ילדים: 60 ÷ 20 = 3.")},
+ {q:B("Early literacy training required?","הכשרה באוריינות מוקדמת נדרשת?"),o:[B("5 hours","5 שעות"),B("10 hours","10 שעות"),B("1 hour","שעה"),B("Not required","לא נדרשת")],a:0,x:B("5 clock hours (0.5 CEU).","5 שעות (0.5 CEU).")}]},
+
+{t:B("Ratios and supervision","יחסים והשגחה"),
+ s:B("Ratios","יחסים"),
+ table:true,
+ pts:[
+ B("Ratios apply <mark>at all times</mark> children are in care and are based on staff with primary responsibility for <mark>direct supervision</mark>: actively watching and directing children in the same room or play area.",
+   "היחסים חלים <mark>בכל זמן</mark> שיש ילדים, ומבוססים על אנשי צוות האחראים ל<mark>השגחה ישירה</mark>: צפייה והכוונה פעילה באותו חדר או אזור משחק."),
+ B("Mixed groups: if any child is <mark>under 1</mark>, the ratio is <mark>1:4</mark> for the whole group; if any child is 1 to under 2, it is <mark>1:6</mark>. For groups of 2 and older, use the age group with the most children.",
+   "קבוצות מעורבות: אם יש ילד <mark>מתחת לגיל שנה</mark>, היחס לכל הקבוצה הוא <mark>1:4</mark>; אם יש ילד בגיל 1 עד פחות מ-2, היחס <mark>1:6</mark>. בקבוצות מגיל 2 ומעלה, לפי קבוצת הגיל עם מספר הילדים הגדול ביותר."),
+ B("Nap time: staff must be within sight and hearing of all children; others needed for ratio stay in the building on the same floor. Children <mark>up to 24 months</mark> need direct supervision at all times.",
+   "בזמן מנוחה: הצוות חייב להיות בטווח ראייה ושמיעה של כל הילדים; שאר הצוות הנדרש ליחס נשאר בבניין באותה קומה. ילדים <mark>עד 24 חודשים</mark> צריכים השגחה ישירה תמיד."),
+ B("Field trips need <mark>one extra adult</mark> beyond the ratio (a supervised parent volunteer can count).",
+   "בטיולים נדרש <mark>מבוגר נוסף אחד</mark> מעבר ליחס (הורה מתנדב בהשגחה יכול להיחשב)."),
+ B("Release a child only to people the parent authorized in writing, verified with a <mark>picture ID</mark>.",
+   "מוסרים ילד רק לאנשים שההורה אישר בכתב, לאחר אימות <mark>תעודה מזהה עם תמונה</mark>."),
+ B("Swimming/wading ratios: infants 1:1, toddlers (1–3) 1:1, preschool (3–5) 1:4, school-age 1:10. A certified lifeguard must be on duty for pools deeper than 3 feet, beaches and lakes.",
+   "יחסים בשחייה: תינוקות 1:1, פעוטות (1–3) 1:1, גן (3–5) 1:4, גיל בית ספר 1:10. מציל מוסמך חייב להיות בתפקיד בבריכה עמוקה מ-3 רגל, בחוף או באגם.")],
+ cards:[B("Infant ratio","1:4"),B("1-year-old ratio","1:6"),B("2-year-old ratio","1:11"),B("3 / 4 / 5-year-old ratios","1:15 · 1:20 · 1:25"),B("Field trip","Ratio + 1 extra adult · יחס + מבוגר נוסף")],
+ quiz:[
+ {q:B("Ratio for 3-year-olds?","היחס לילדים בני 3?"),o:[B("1:15","1:15"),B("1:11","1:11"),B("1:20","1:20"),B("1:10","1:10")],a:0,x:B("3-year-olds: 1:15.","בני 3: 1:15.")},
+ {q:B("A group has eight 2-year-olds and one 10-month-old. Ratio?","בקבוצה שמונה בני 2 ותינוק בן 10 חודשים. מה היחס?"),o:[B("1:4","1:4"),B("1:11","1:11"),B("1:6","1:6"),B("1:8","1:8")],a:0,x:B("Any child under 1 makes it 1:4 for the whole group.","ילד מתחת לגיל שנה הופך את היחס ל-1:4 לכל הקבוצה.")},
+ {q:B("Swimming ratio for 4-year-olds?","יחס בשחייה לבני 4?"),o:[B("1:4","1:4"),B("1:20","1:20"),B("1:1","1:1"),B("1:10","1:10")],a:0,x:B("Preschoolers 3–5 in water: 1:4.","גיל גן 3–5 במים: 1:4.")},
+ {q:B("Grandma (not on the list) comes for pickup. You…","סבתא (לא ברשימה) מגיעה לאסוף. מה עושים?"),o:[B("Don't release until the parent authorizes in writing","לא מוסרים עד אישור הורה בכתב"),B("Release if the child knows her","מוסרים אם הילד מכיר אותה"),B("Release with a phone call","מוסרים אחרי שיחת טלפון"),B("Release with ID only","מוסרים עם תעודה בלבד")],a:0,x:B("Authorized in writing and verified with picture ID.","רק מורשים בכתב, עם אימות תעודה עם תמונה.")}]},
+
+{t:B("Discipline and daily activities","משמעת ופעילויות יומיות"),
+ s:B("Discipline","משמעת"),
+ pts:[
+ B("Every facility needs a written discipline and expulsion policy, given to parents (signature on the enrollment form). Discipline may never be <mark>severe, humiliating, frightening, or tied to food, rest or toileting</mark>. <mark>Spanking or any physical punishment is prohibited.</mark>",
+   "לכל מתקן חייבת להיות מדיניות משמעת והרחקה כתובה שנמסרת להורים (חתימה בטופס הרישום). משמעת לעולם לא תהיה <mark>חמורה, משפילה, מפחידה, או קשורה לאוכל, מנוחה או שירותים</mark>. <mark>מכות או כל ענישה גופנית אסורות.</mark>"),
+ B("Also prohibited: isolating a child where they cannot be seen, binding or taping the mouth, withholding food or drink, harsh toilet-training methods, emotional abuse, sarcastic or profane language, rough handling (jerking by the arms), and <mark>using a crib for time-out</mark>.",
+   "אסור גם: לבודד ילד במקום שבו לא רואים אותו, לקשור או להדביק פה, למנוע אוכל או שתייה, שיטות גמילה מעליבות, התעללות רגשית, שפה עוקצנית או גסה, טיפול גס (משיכה בזרועות), ו<mark>שימוש בעריסה לפסק זמן</mark>."),
+ B("Active play may not be completely withheld. <mark>Time-outs</mark> are allowed with an age-appropriate time limit.",
+   "אסור לשלול לגמרי משחק פעיל. <mark>פסק זמן</mark> מותר עם הגבלת זמן מתאימה לגיל."),
+ B("Each group posts a written activity plan with a bad-weather alternative. Outdoor active play <mark>at least twice a day</mark>, weather permitting.",
+   "כל קבוצה מפרסמת תוכנית פעילות כתובה עם חלופה למזג אוויר גרוע. משחק פעיל בחוץ <mark>לפחות פעמיים ביום</mark> כשמזג האוויר מאפשר."),
+ B("Screens: <mark>none under age 2</mark>; ages 2+ only for education or physical activity, <mark>1–2 hours a day max</mark>. Infant seats/swings: no more than 15–30 minutes at a time, twice a day.",
+   "מסכים: <mark>לא מתחת לגיל 2</mark>; מגיל 2 רק לחינוך או פעילות גופנית, <mark>עד 1–2 שעות ביום</mark>. כיסאות תינוק/נדנדות: לא יותר מ-15–30 דקות בכל פעם, פעמיים ביום."),
+ B("Field trips: post date, time and place <mark>two working days</mark> ahead, get written permission, and keep permission records <mark>12 months</mark>.",
+   "טיולים: לפרסם תאריך, שעה ומקום <mark>שני ימי עבודה</mark> מראש, לקבל אישור הורים בכתב, ולשמור את האישורים <mark>12 חודשים</mark>.")],
+ cards:[B("Physical punishment","Always prohibited · אסורה תמיד"),B("Crib as time-out","Prohibited · אסור"),B("Screen time under 2","None · אין"),B("Outdoor play","2× a day · פעמיים ביום"),B("Field trip notice","2 working days · 2 ימי עבודה")],
+ quiz:[
+ {q:B("Which is allowed?","מה מותר?"),o:[B("An age-appropriate time-out in view","פסק זמן מתאים לגיל בטווח ראייה"),B("Skipping snack as punishment","ביטול ארוחת ביניים כעונש"),B("Keeping a child in from all outdoor play","השארת ילד בפנים כל זמן החצר"),B("Time-out in a crib","פסק זמן בעריסה")],a:0,x:B("Time-outs with a time limit are allowed; the rest are prohibited.","פסק זמן מוגבל בזמן מותר; השאר אסורים.")},
+ {q:B("Maximum screen time for a 3-year-old?","זמן מסך מרבי לילד בן 3?"),o:[B("1–2 hours a day, educational","1–2 שעות ביום, חינוכי"),B("Unlimited","ללא הגבלה"),B("None","אסור לגמרי"),B("4 hours","4 שעות")],a:0,x:B("Ages 2+: educational/physical activity only, 1–2 hours.","מגיל 2: חינוכי/פעילות גופנית בלבד, 1–2 שעות.")},
+ {q:B("How far ahead must a field trip be posted?","כמה זמן מראש יש לפרסם טיול?"),o:[B("2 working days","2 ימי עבודה"),B("1 week","שבוע"),B("Same day","באותו יום"),B("30 days","30 יום")],a:0,x:B("Two working days.","שני ימי עבודה.")},
+ {q:B("Where must parents acknowledge the discipline policy?","היכן מאשרים ההורים את מדיניות המשמעת?"),o:[B("Enrollment form signature","חתימה בטופס הרישום"),B("Verbally","בעל פה"),B("Not needed","לא נדרש"),B("Only if asked","רק אם שואלים")],a:0,x:B("Documented with the parent's signature on the enrollment form.","מתועד בחתימת ההורה בטופס הרישום.")}]},
+
+{t:B("The physical environment","הסביבה הפיזית"),
+ s:B("Space & safety","שטח ובטיחות"),
+ pts:[
+ B("Indoor space: <mark>35 sq ft</mark> of usable floor space per child (20 sq ft only for facilities continuously licensed since Oct 1, 1992). Kitchens, offices, hallways, bathrooms and storage don't count.",
+   "שטח פנימי: <mark>35 רגל רבוע</mark> שטח שמיש לכל ילד (20 רגל רבוע רק למתקנים ברישיון רציף מאז 1 באוקטובר 1992). מטבח, משרדים, מסדרונות, שירותים ומחסנים לא נספרים."),
+ B("Outdoor space: <mark>45 sq ft</mark> per child age 1+, enough for at least <mark>half</mark> the licensed capacity. Fence at least <mark>4 feet</mark> high, no gaps over 3½ inches, at least two exits, shade required.",
+   "שטח חיצוני: <mark>45 רגל רבוע</mark> לכל ילד מגיל שנה, מספיק לפחות ל<mark>מחצית</mark> מהתפוסה המורשית. גדר בגובה <mark>4 רגל</mark> לפחות, ללא פתחים מעל 3.5 אינץ׳, לפחות שתי יציאות, ונדרש צל."),
+ B("Restrooms: one toilet and one sink for the <mark>first 15 children</mark>, plus one more of each for <mark>every 30</mark> after that.",
+   "שירותים: אסלה וכיור אחד ל<mark>15 הילדים הראשונים</mark>, ועוד אחד מכל סוג על כל <mark>30 ילדים</mark> נוספים."),
+ B("Indoor temperature <mark>65–82°F</mark> at all times. Lighting at least 20 foot-candles (50 for close work).",
+   "טמפרטורה פנימית <mark>65–82°F</mark> (בערך 18–28°C) תמיד. תאורה לפחות 20 פוט-קנדל (50 לעבודה מקרוב)."),
+ B("Daily: inspect indoor and outdoor play areas; keep the indoor log <mark>12 months</mark>. Tamper-resistant outlets or covers; chemicals locked or out of reach; no strangulation cords; no smoking or vaping anywhere children are in care.",
+   "מדי יום: לבדוק את אזורי המשחק בפנים ובחוץ; לשמור את יומן הבדיקה הפנימי <mark>12 חודשים</mark>. שקעים מוגנים או כיסויים; חומרים מסוכנים נעולים או מחוץ להישג יד; ללא חבלים שעלולים לחנוק; אסור לעשן או לאדות בשום מקום שבו יש ילדים."),
+ B("Licensed capacity is set by the <mark>most restrictive</mark> of: indoor space, outdoor space, sewer/septic, toilets and sinks. It must be posted in each room.",
+   "התפוסה המורשית נקבעת לפי הגורם <mark>המגביל ביותר</mark>: שטח פנימי, שטח חיצוני, ביוב, אסלות וכיורים. יש לפרסם אותה בכל חדר.")],
+ cards:[B("Indoor sq ft per child","35 (20 if licensed since 1992)"),B("Outdoor sq ft per child","45"),B("Toilets","1 per first 15, +1 per 30"),B("Indoor temperature","65–82°F"),B("Fence height","4 ft min · 4 רגל לפחות")],
+ quiz:[
+ {q:B("A new classroom is 700 usable sq ft. Max children?","כיתה חדשה בשטח 700 רגל רבוע. מקסימום ילדים?"),o:[B("20","20"),B("35","35"),B("15","15"),B("25","25")],a:0,x:B("700 ÷ 35 = 20.","700 ÷ 35 = 20.")},
+ {q:B("A facility has 45 children. Minimum toilets?","במתקן 45 ילדים. מינימום אסלות?"),o:[B("2","2"),B("1","1"),B("3","3"),B("4","4")],a:0,x:B("1 for the first 15, +1 for the next 30 = 2.","1 ל-15 הראשונים, +1 ל-30 הבאים = 2.")},
+ {q:B("Acceptable indoor temperature?","טמפרטורה פנימית תקינה?"),o:[B("65–82°F","65–82°F"),B("60–90°F","60–90°F"),B("70–75°F","70–75°F"),B("Any","כל טמפרטורה")],a:0,x:B("65 to 82°F.","65 עד 82°F.")},
+ {q:B("Capacity is based on…","התפוסה נקבעת לפי…"),o:[B("The most restrictive factor","הגורם המגביל ביותר"),B("Indoor space only","שטח פנימי בלבד"),B("Staff count","מספר עובדים"),B("Parent demand","ביקוש הורים")],a:0,x:B("The tightest of space, outdoor, sewer and toilets.","הגורם המחמיר ביותר מבין שטח, חצר, ביוב ושירותים.")}]},
+
+{t:B("Napping and safe sleep","מנוחה ושינה בטוחה"),
+ s:B("Safe sleep","שינה בטוחה"),
+ pts:[
+ B("Infants who can't roll over sleep <mark>on their backs</mark> on a firm surface (unless a physician authorizes otherwise) to reduce SIDS risk.",
+   "תינוקות שלא יודעים להתהפך ישנים <mark>על הגב</mark> על משטח יציב (אלא אם רופא אישר אחרת) כדי להפחית סיכון למוות בעריסה."),
+ B("Cribs/play yards: tight-fitted sheet and <mark>nothing else</mark>: no bumpers, mobiles, quilts, blankets, pillows or stuffed animals. <mark>No swaddling</mark> without written physician authorization; fitted sleep sacks are OK.",
+   "עריסות/לולים: סדין מותאם <mark>ותו לא</mark>: בלי מגיני ראש, מובייל, שמיכות, כריות או בובות. <mark>אסור לחתל בצמוד</mark> (swaddling) ללא אישור רופא בכתב; שק שינה מותאם מותר."),
+ B("Children under 1 nap in a crib or play yard with sides. Crib bar spacing no more than <mark>2⅜ inches</mark>.",
+   "ילדים מתחת לגיל שנה ישנים בעריסה או לול עם דפנות. מרווח בין הסורגים לא יותר מ-<mark>2⅜ אינץ׳</mark>."),
+ B("Keep <mark>18 inches</mark> around each napping space (no more than two sides against a wall) and 18 inches from blinds or cords. Not in exit paths.",
+   "לשמור <mark>18 אינץ׳</mark> סביב כל מקום מנוחה (לא יותר משני צדדים צמודים לקיר) ו-18 אינץ׳ מתריסים ופתילים. לא בנתיבי יציאה."),
+ B("Floor mats at least <mark>1 inch</mark> thick with a waterproof cover. No air or foam mattresses, no bunk cribs or cots. Linens washed at least weekly and between children.",
+   "מזרני רצפה בעובי <mark>אינץ׳ אחד</mark> לפחות עם כיסוי אטום. ללא מזרני אוויר או ספוג, ללא מיטות קומתיים. מצעים מכובסים לפחות פעם בשבוע ובין ילד לילד."),
+ B("Programs with infants need a written policy to prevent shaken baby syndrome and abusive head trauma.",
+   "תוכניות עם תינוקות צריכות מדיניות כתובה למניעת תסמונת התינוק המטולטל ופגיעת ראש מכוונת.")],
+ cards:[B("Infant sleep position","On the back · על הגב"),B("Crib bar spacing","≤ 2⅜ in"),B("Space around nap areas","18 in · 18 אינץ׳"),B("Mat thickness","≥ 1 in"),B("Swaddling","Only with doctor's note · רק באישור רופא")],
+ quiz:[
+ {q:B("What may be in an infant's crib?","מה מותר בעריסת תינוק?"),o:[B("A tight-fitted sheet","סדין מותאם"),B("A soft blanket","שמיכה רכה"),B("A small pillow","כרית קטנה"),B("Bumper pads","מגיני ראש")],a:0,x:B("Only a fitted sheet; no excess bedding.","רק סדין מותאם; ללא מצעים נוספים.")},
+ {q:B("Minimum space around each cot?","מרווח מינימלי סביב כל מיטה?"),o:[B("18 inches","18 אינץ׳"),B("6 inches","6 אינץ׳"),B("3 feet","3 רגל"),B("None","אין")],a:0,x:B("18 inches.","18 אינץ׳.")},
+ {q:B("When can an infant be swaddled?","מתי מותר לחתל תינוק בצמוד?"),o:[B("With written physician authorization","באישור רופא בכתב"),B("When the parent asks verbally","כשההורה מבקש בעל פה"),B("Always","תמיד"),B("Only at nap","רק במנוחה")],a:0,x:B("Only with a physician's written authorization on file.","רק עם אישור רופא בכתב בתיק.")},
+ {q:B("Minimum floor mat thickness?","עובי מינימלי למזרן רצפה?"),o:[B("1 inch","אינץ׳ אחד"),B("½ inch","חצי אינץ׳"),B("2 inches","2 אינץ׳"),B("3 inches","3 אינץ׳")],a:0,x:B("At least one inch with an impermeable cover.","לפחות אינץ׳ עם כיסוי אטום.")}]},
+
+{t:B("Fire safety and emergencies","בטיחות אש וחירום"),
+ s:B("Drills","תרגילים"),
+ pts:[
+ B("Fire drills using the alarm: <mark>monthly</mark>, at different dates and times. Each license year must include one drill using an <mark>alternate route</mark>, one during <mark>nap time</mark>, and one at the request of the <mark>licensing authority</mark>.",
+   "תרגילי אש עם האזעקה: <mark>כל חודש</mark>, בתאריכים ושעות שונים. בכל שנת רישוי חייבים: תרגיל ב<mark>מסלול חלופי</mark>, תרגיל ב<mark>זמן מנוחה</mark>, ותרגיל לבקשת <mark>רשות הרישוי</mark>."),
+ B("Drill records (date, number of children and staff, route, evacuation time) are kept <mark>12 months</mark>. Take the attendance record and parent contacts out with you.",
+   "רישומי התרגילים (תאריך, מספר ילדים ואנשי צוות, מסלול, זמן פינוי) נשמרים <mark>12 חודשים</mark>. יוצאים עם רשימת הנוכחות ופרטי ההורים."),
+ B("<mark>Lockdown</mark> and <mark>inclement weather</mark> drills: at least once each per year. They may replace a monthly fire drill, but no more than <mark>3 times</mark> a year.",
+   "תרגילי <mark>נעילה</mark> ו<mark>מזג אוויר קשה</mark>: לפחות פעם אחת כל אחד בשנה. אפשר להחליף בהם תרגיל אש חודשי, אך לא יותר מ-<mark>3 פעמים</mark> בשנה."),
+ B("Written emergency plan covers fire, evacuation, relocation, shelter in place, lockdown, hurricanes/storms and family reunification. An evacuation diagram is posted <mark>in every room</mark> except restrooms.",
+   "תוכנית חירום כתובה כוללת אש, פינוי, העתקה, מיגון במקום, נעילה, הוריקנים/סערות ואיחוד משפחות. תרשים פינוי תלוי <mark>בכל חדר</mark> למעט שירותים."),
+ B("Fire extinguishers rated at least <mark>2A:10BC</mark>, no more than <mark>75 feet</mark> from rooms with children, plus one in each vehicle and the kitchen. Annual fire inspection. At least one working <mark>corded phone</mark>.",
+   "מטפי כיבוי בדירוג <mark>2A:10BC</mark> לפחות, במרחק של לא יותר מ-<mark>75 רגל</mark> מחדרי ילדים, וגם בכל רכב ובמטבח. ביקורת אש שנתית. לפחות <mark>טלפון קווי</mark> אחד תקין."),
+ B("After a fire or disaster, notify the licensing authority of your operating status <mark>within 24 hours</mark>.",
+   "אחרי שריפה או אסון, יש לעדכן את רשות הרישוי על מצב הפעילות <mark>תוך 24 שעות</mark>.")],
+ cards:[B("Fire drill frequency","Monthly · כל חודש"),B("3 required special drills","Alternate route, nap time, licensing request"),B("Drill record retention","12 months"),B("Max drill substitutions","3 per year · 3 בשנה"),B("Report after disaster","Within 24 hours · תוך 24 שעות")],
+ quiz:[
+ {q:B("How often are fire drills?","באיזו תדירות תרגילי אש?"),o:[B("Monthly","כל חודש"),B("Weekly","כל שבוע"),B("Quarterly","כל רבעון"),B("Yearly","פעם בשנה")],a:0,x:B("Monthly, at varied dates and times.","חודשי, בתאריכים ושעות משתנים.")},
+ {q:B("How many times a year can lockdown/weather drills replace a fire drill?","כמה פעמים בשנה תרגילי נעילה/מזג אוויר יכולים להחליף תרגיל אש?"),o:[B("3","3"),B("1","1"),B("6","6"),B("Never","אף פעם")],a:0,x:B("No more than three substitutions per licensure year.","לא יותר משלוש החלפות בשנת רישוי.")},
+ {q:B("Max distance to a fire extinguisher?","מרחק מרבי למטף?"),o:[B("75 feet","75 רגל"),B("25 feet","25 רגל"),B("150 feet","150 רגל"),B("Any","כל מרחק")],a:0,x:B("75 feet from rooms occupied by children.","75 רגל מחדרים שיש בהם ילדים.")},
+ {q:B("What must go out the door with staff during a drill?","מה חייב לצאת עם הצוות בתרגיל?"),o:[B("Attendance record and parent contacts","רשימת נוכחות ופרטי הורים"),B("The menu","התפריט"),B("Lesson plans","מערכי שיעור"),B("Nothing","כלום")],a:0,x:B("Used to account for every child.","משמשים לספירת כל הילדים.")}]},
+
+{t:B("Health, food and records","בריאות, מזון ורישומים"),
+ s:B("Health & food","בריאות ומזון"),
+ pts:[
+ B("Within <mark>30 days</mark> of enrollment each child needs a <mark>DH 680</mark> immunization certificate (or DH 681 religious exemption) and a <mark>DH 3040</mark> student health exam, kept current while enrolled.",
+   "תוך <mark>30 יום</mark> מההרשמה כל ילד צריך אישור חיסונים <mark>DH 680</mark> (או פטור דתי DH 681) ובדיקה רפואית <mark>DH 3040</mark>, בתוקף כל עוד הוא רשום."),
+ B("Medication: written parent authorization with child's name, medication, date, time and dose; staff initial when given. Wash hands before and after giving medication.",
+   "תרופות: אישור הורה בכתב עם שם הילד, התרופה, תאריך, שעה ומינון; איש הצוות חותם בראשי תיבות בעת המתן. רוחצים ידיים לפני ואחרי מתן תרופה."),
+ B("Food temperatures: cold at <mark>41°F or below</mark>, hot at <mark>135°F or above</mark>. Leftovers reheated to 165°F. Opened perishables discarded within 7 days. Menus posted weekly and kept 12 months.",
+   "טמפרטורות מזון: קר ב-<mark>41°F או פחות</mark>, חם ב-<mark>135°F או יותר</mark>. שאריות מחוממות ל-165°F. מזון מתכלה פתוח נזרק תוך 7 ימים. תפריטים מפורסמים כל שבוע ונשמרים 12 חודשים."),
+ B("Choking hazards (whole hot dogs, popcorn, whole grapes, nuts, cheese cubes) are not served <mark>under age 4</mark>. Cut food to <mark>¼ inch</mark> for infants and <mark>½ inch</mark> for toddlers.",
+   "מזונות שעלולים לגרום לחנק (נקניקיות שלמות, פופקורן, ענבים שלמים, אגוזים, קוביות גבינה) לא מוגשים <mark>מתחת לגיל 4</mark>. חותכים לחתיכות <mark>¼ אינץ׳</mark> לתינוקות ו-<mark>½ אינץ׳</mark> לפעוטות."),
+ B("Bottles: <mark>never in the microwave</mark>, warmed only once, no propped bottles, discarded within 1 hour after feeding. Prepared bottles refrigerated and used within 24 hours. Label everything from home with first and last name.",
+   "בקבוקים: <mark>אף פעם לא במיקרוגל</mark>, מחממים פעם אחת בלבד, אסור להשעין בקבוק, זורקים תוך שעה מההאכלה. בקבוקים מוכנים בקירור ובשימוש תוך 24 שעות. כל מה שמגיע מהבית מסומן בשם פרטי ומשפחה."),
+ B("Handwashing with soap and running water (CDC method); <mark>hand sanitizer does not replace it</mark> except away from running water. Diaper area separate from food areas, sanitized after each use, never leave a child unattended on the table.",
+   "שטיפת ידיים בסבון ומים זורמים (שיטת CDC); <mark>ג׳ל חיטוי לא מחליף אותה</mark> אלא כשאין מים זורמים. אזור החלפת חיתולים נפרד מאזורי מזון, מחוטא אחרי כל שימוש, ולעולם לא משאירים ילד לבד על השולחן."),
+ B("Daily attendance records each child's arrival and departure.",
+   "רישום נוכחות יומי מתעד הגעה ויציאה של כל ילד.")],
+ cards:[B("DH 680","Immunization certificate · אישור חיסונים"),B("DH 3040","Student health exam · בדיקה רפואית"),B("Health forms due","30 days after enrollment"),B("Cold / hot food","≤41°F / ≥135°F"),B("Bottle in microwave?","Never · אף פעם")],
+ quiz:[
+ {q:B("DH 3040 is the…","DH 3040 הוא…"),o:[B("Student health exam","טופס בדיקה רפואית"),B("Immunization record","אישור חיסונים"),B("Enrollment form","טופס רישום"),B("Medication log","יומן תרופות")],a:0,x:B("DH 680 = immunizations; DH 3040 = health exam.","DH 680 = חיסונים; DH 3040 = בדיקה רפואית.")},
+ {q:B("Cold food must be kept at…","מזון קר נשמר ב…"),o:[B("41°F or below","41°F או פחות"),B("50°F or below","50°F או פחות"),B("32°F exactly","בדיוק 32°F"),B("Room temp","טמפ׳ החדר")],a:0,x:B("41°F or below; hot at 135°F or above.","41°F או פחות; חם 135°F ומעלה.")},
+ {q:B("Can you serve whole grapes to a 3-year-old?","מותר להגיש ענבים שלמים לבן 3?"),o:[B("No, under 4 is prohibited","לא, אסור מתחת לגיל 4"),B("Yes","כן"),B("Only with a parent","רק עם הורה"),B("Only at lunch","רק בצהריים")],a:0,x:B("Choking foods are not served under age 4.","מזונות חנק לא מוגשים מתחת לגיל 4.")},
+ {q:B("When is hand sanitizer acceptable instead of washing?","מתי ג׳ל חיטוי מקובל במקום שטיפה?"),o:[B("Away from running water, e.g. field trips","כשאין מים זורמים, למשל בטיול"),B("Always","תמיד"),B("After diapering","אחרי החלפת חיתול"),B("Before meals","לפני ארוחות")],a:0,x:B("Only where running water isn't available.","רק כשאין מים זורמים.")}]},
+
+{t:B("Transportation, ADA, reporting abuse","הסעות, ADA, דיווח על התעללות"),
+ s:B("Transport & review","הסעות וחזרה"),
+ pts:[
+ B("Drivers need a valid <mark>Florida driver's license</mark> with the proper endorsement, an <mark>annual physical</mark>, and current <mark>first aid and pediatric CPR</mark>. Vehicles get an annual mechanic inspection, ratios apply in the vehicle, and the inside stays 65–82°F.",
+   "נהגים צריכים <mark>רישיון נהיגה של פלורידה</mark> בתוקף עם ההיתר המתאים, <mark>בדיקה רפואית שנתית</mark>, ותעודה בתוקף ב<mark>עזרה ראשונה והחייאת ילדים</mark>. הרכב נבדק ע״י מכונאי מדי שנה, היחסים חלים גם ברכב, והטמפרטורה בפנים 65–82°F."),
+ B("<mark>Transportation log</mark>: each child's name, date and time of departure and arrival, driver's signature, and a <mark>second staff member's</mark> signature. On arrival the driver marks each child off, does a <mark>visual sweep</mark> of the vehicle, and a second staff member does a second sweep. Keep logs <mark>12 months</mark>.",
+   "<mark>יומן הסעות</mark>: שם כל ילד, תאריך ושעת יציאה והגעה, חתימת הנהג וחתימת <mark>איש צוות שני</mark>. בהגעה הנהג מסמן כל ילד שיורד, עורך <mark>סריקה חזותית</mark> של הרכב, ואיש צוות שני עורך סריקה נוספת. שומרים <mark>12 חודשים</mark>."),
+ B("Every vehicle has a DCF-approved <mark>child safety alarm</mark>: arms with the ignition, sounds within <mark>1 minute</mark> unless the driver walks to the back to shut it off, audible from <mark>500 feet</mark>.",
+   "בכל רכב <mark>אזעקת בטיחות ילדים</mark> מאושרת DCF: נדרכת עם ההצתה, מצפצפת תוך <mark>דקה</mark> אם הנהג לא הולך לאחור לכבות אותה, ונשמעת ממרחק <mark>500 רגל</mark>."),
+ B("Car seats: under 1 <mark>rear-facing</mark>; ages 1–3 a separate carrier or built-in seat; age 4 carrier, built-in or booster with belt; 5+ seat belt. Children ride in the back seat.",
+   "מושבי בטיחות: מתחת לגיל שנה <mark>הפוך לכיוון הנסיעה</mark>; גיל 1–3 מושב נפרד או מובנה; גיל 4 מושב, מובנה או בוסטר עם חגורה; 5 ומעלה חגורת בטיחות. ילדים יושבים מאחור."),
+ B("<mark>ADA</mark>: programs must make reasonable accommodations to the environment, activities and schedule so children with disabilities can participate. Directors take basic training on serving children with disabilities within 5 years of employment.",
+   "<mark>ADA</mark>: התוכנית חייבת לבצע התאמות סבירות בסביבה, בפעילויות ובלוח הזמנים כדי שילדים עם מוגבלויות ישתתפו. מנהלים עוברים הכשרה בסיסית בשירות לילדים עם מוגבלויות תוך 5 שנים מתחילת העבודה."),
+ B("Child care staff are <mark>mandatory reporters</mark>: suspected abuse or neglect is reported to the <mark>Florida Abuse Hotline, 1-800-96-ABUSE (1-800-962-2873)</mark>. Staff sign a statement that they understand this duty.",
+   "צוות טיפול בילדים הם <mark>מדווחים מחויבים</mark>: חשד להתעללות או הזנחה מדווח ל<mark>קו החם של פלורידה, ‎1-800-962-2873‎ (1-800-96-ABUSE)</mark>. העובדים חותמים שהם מבינים את החובה הזו.")],
+ cards:[B("Transport log kept","12 months"),B("Vehicle alarm sounds within","1 minute, heard at 500 ft"),B("Infant car seat","Rear-facing · הפוך לכיוון הנסיעה"),B("Abuse hotline","1-800-96-ABUSE"),B("ADA requires","Reasonable accommodations · התאמות סבירות")],
+ quiz:[
+ {q:B("After arrival, who does the second vehicle sweep?","מי עורך את הסריקה השנייה ברכב?"),o:[B("A second child care staff member","איש צוות שני"),B("The driver again","הנהג שוב"),B("A parent","הורה"),B("No one","אף אחד")],a:0,x:B("A second, different staff member sweeps and signs.","איש צוות שני ושונה סורק וחותם.")},
+ {q:B("A 10-month-old rides in…","תינוק בן 10 חודשים נוסע ב…"),o:[B("A rear-facing car seat","מושב הפוך לכיוון הנסיעה"),B("A booster","בוסטר"),B("A seat belt","חגורת בטיחות"),B("A lap","בחיק מבוגר")],a:0,x:B("Birth to 1: rear-facing.","לידה עד שנה: הפוך לכיוון הנסיעה.")},
+ {q:B("You see signs of possible abuse. You…","ראיתם סימנים להתעללות אפשרית. מה עושים?"),o:[B("Call the Florida Abuse Hotline","מתקשרים לקו החם"),B("Wait until you are sure","מחכים עד שבטוחים"),B("Ask the parent first","שואלים קודם את ההורה"),B("Tell only the director","מספרים רק למנהל")],a:0,x:B("Reasonable suspicion is enough; mandatory reporters report directly.","חשד סביר מספיק; מדווחים מחויבים מדווחים ישירות.")},
+ {q:B("How long is the transportation log kept?","כמה זמן נשמר יומן ההסעות?"),o:[B("12 months","12 חודשים"),B("1 month","חודש"),B("4 months","4 חודשים"),B("5 years","5 שנים")],a:0,x:B("At least 12 months.","לפחות 12 חודשים.")}]}
+];
+
+const RATIOS=[["Infant (0–12 mo)","תינוק (0–12 ח׳)","1:4"],["1 year","גיל שנה","1:6"],["2 years","גיל 2","1:11"],["3 years","גיל 3","1:15"],["4 years","גיל 4","1:20"],["5 years and up","גיל 5 ומעלה","1:25"]];
+
+const SEGS=[{m:10,en:"Review",he:"חזרה"},{m:30,en:"Learn",he:"לימוד"},{m:10,en:"Flashcards",he:"כרטיסיות"},{m:10,en:"Quiz",he:"בוחן"}];
+
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let done=store.get("rr-done",[]);
+let mode=store.get("rr-mode","both");
+let cur=Math.min(DAYS.length-1,Math.max(0,DAYS.findIndex((_,i)=>!done.includes(i))));
+if(cur<0)cur=0;
+
+const bi=(o,tag="div",cls="")=>`<${tag} class="en ${cls}" lang="en">${o.en}</${tag}><${tag} class="he ${cls}" lang="he" dir="rtl">${o.he}</${tag}>`;
+
+function setMode(m){mode=m;store.set("rr-mode",m);document.body.className="m-"+m;
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===m))}
+
+function renderDays(){
+  const nav=document.getElementById("days");
+  nav.innerHTML=DAYS.map((d,i)=>`<button class="daytab ${done.includes(i)?"done":""}" aria-current="${i===cur}" data-i="${i}" title="${d.t.en}"><span class="n">${i+1}</span><span class="s">${done.includes(i)?"✓ done":d.s.en}</span></button>`).join("");
+  nav.querySelectorAll(".daytab").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;renderDays();renderDay();window.scrollTo({top:0})});
+  document.getElementById("prog").textContent=`${done.length}/10 days complete · ${done.length}/10 ימים הושלמו`;
+}
+
+function renderDay(){
+  const d=DAYS[cur], prev=cur>0?DAYS[cur-1]:null;
+  let h=`<div class="sec"><span class="label">Day ${cur+1} of 10 · יום ${cur+1} מתוך 10</span><div class="bi">${bi(d.t,"h2")}</div></div>`;
+  // Review
+  h+=`<div class="sec"><div class="sec-head"><h3>1 · Review · חזרה</h3><span class="mins">10 min</span></div>`;
+  if(prev){h+=`<div class="bi">${bi({en:`Without looking, say aloud the five flashcard answers from Day ${cur}: <b>${prev.t.en}</b>. Then reveal them below.`,he:`בלי להסתכל, אמרו בקול את חמש התשובות מהכרטיסיות של יום ${cur}: <b>${prev.t.he}</b>. אחר כך חשפו אותן למטה.`},"p")}</div>
+  <div class="cards">${prev.cards.map((c,i)=>`<button class="card" id="rc${i}"><span class="front">${c.en}</span><span class="back">${c.he}</span></button>`).join("")}</div>`;}
+  else{h+=`<div class="bi">${bi({en:"First day: read the course goals below, then skim the table of contents of the DCF Child Care Facility Handbook so you know its main chapters: General Requirements, Physical Environment, Training, Background Screening, Health, Record Keeping, Access/Child Safety.",he:"יום ראשון: קראו את מטרות הקורס למטה, ועברו על תוכן העניינים של מדריך מתקני הטיפול בילדים של DCF כדי להכיר את פרקיו: דרישות כלליות, סביבה פיזית, הכשרה, בדיקות רקע, בריאות, ניהול רישומים, גישה ובטיחות ילדים."},"p")}</div>`;}
+  h+=`</div>`;
+  // Learn
+  h+=`<div class="sec"><div class="sec-head"><h3>2 · Learn · לימוד</h3><span class="mins">30 min</span></div>`;
+  h+=`<div class="bi">${bi({en:"Read each point, then cover it and explain it in your own words in the other language.",he:"קראו כל נקודה, כסו אותה והסבירו אותה במילים שלכם בשפה השנייה."},"p","ex")}</div>`;
+  if(d.table){h+=`<div class="tbl"><table><thead><tr><th>Age group</th><th style="text-align:right" dir="rtl">קבוצת גיל</th><th>Staff : children</th></tr></thead><tbody>${RATIOS.map(r=>`<tr><td>${r[0]}</td><td dir="rtl" style="text-align:right">${r[1]}</td><td><b>${r[2]}</b></td></tr>`).join("")}</tbody></table></div>`;}
+  h+=`<div class="tools"><button class="mini" data-readall>${ICON.spk} Listen to all · הקשב להכול</button></div>`;
+  h+=`<ul class="points">${d.pts.map((p,pi)=>`<li><div class="bi">${bi(p)}</div><div class="tools"><button class="mini" data-read="${pi}">${ICON.spk} Listen · הקשב</button><button class="mini" data-explain="${pi}">${ICON.ask} Explain simply · הסבר בפשטות</button><button class="mini" data-example="${pi}">${ICON.ask} Example · דוגמה</button></div></li>`).join("")}</ul></div>`;
+  // Flashcards
+  h+=`<div class="sec"><div class="sec-head"><h3>3 · Flashcards · כרטיסיות</h3><span class="mins">10 min</span></div>
+  <div class="bi">${bi({en:"Tap a card to flip it. Go through them until you get all five right twice in a row.",he:"הקישו על כרטיס כדי להפוך אותו. חזרו עליהם עד שתענו נכון על כל החמישה פעמיים ברצף."},"p","ex")}</div>
+  <div class="cards">${d.cards.map((c,i)=>`<button class="card" id="fc${i}"><span class="front">${c.en}</span><span class="back">${c.he}</span></button>`).join("")}</div></div>`;
+  // Quiz
+  h+=`<div class="sec"><div class="sec-head"><h3>4 · Quiz · בוחן</h3><span class="mins">10 min</span><span class="score" id="score"></span></div>`;
+  d.quiz.forEach((q,qi)=>{
+    const order=shuffle(q.o.map((_,i)=>i),cur*7+qi);
+    h+=`<div class="q" data-q="${qi}"><div class="bi">${bi(q.q,"div","qt")}</div><div class="opts">${order.map(oi=>`<button class="opt" data-o="${oi}"><div class="bi">${bi(q.o[oi],"span")}</div></button>`).join("")}</div><div class="ex" hidden><div class="bi">${bi(q.x)}</div><div class="tools"><button class="mini" data-why="${qi}">${ICON.ask} Ask the helper why · שאלו את העוזר למה</button></div></div></div>`;
+  });
+  h+=`</div>`;
+  h+=`<div class="foot"><button class="btn" id="markdone">${done.includes(cur)?"✓ Completed · הושלם":"Mark day complete · סמן יום כהושלם"}</button>
+  ${cur<9?`<button class="btn ghost" id="next">Next day → · ליום הבא</button>`:`<span class="ex">${bi({en:"Last day: retake every quiz from Days 1–9 and aim for 100%.",he:"יום אחרון: עשו שוב את כל הבחנים מימים 1–9 ושאפו ל-100%."},"span")}</span>`}</div>`;
+  const sheet=document.getElementById("sheet");sheet.innerHTML=h;
+  sheet.querySelectorAll(".card").forEach(c=>c.onclick=()=>c.classList.toggle("flip"));
+  sheet.querySelectorAll("[data-read]").forEach(b=>b.onclick=()=>speakBi(d.pts[+b.dataset.read],b));
+  sheet.querySelector("[data-readall]").onclick=e=>speakBi({en:d.pts.map(p=>plain(p.en)).join(" "),he:d.pts.map(p=>plain(p.he)).join(" ")},e.currentTarget);
+  sheet.querySelectorAll("[data-explain]").forEach(b=>b.onclick=()=>{const p=d.pts[+b.dataset.explain];
+    askHelper(`Explain this rule in very simple words, like to a beginner, and say why it matters for children's safety:\n\n${plain(p.en)}`,
+      {en:`Explain simply: “${plain(p.en).slice(0,80)}…”`,he:`הסבר בפשטות: ”${plain(p.he).slice(0,70)}…“`});});
+  sheet.querySelectorAll("[data-example]").forEach(b=>b.onclick=()=>{const p=d.pts[+b.dataset.example];
+    askHelper(`Give one short, realistic example from a day at a child care center that shows this rule being followed, and one showing it being broken:\n\n${plain(p.en)}`,
+      {en:`Give an example: “${plain(p.en).slice(0,80)}…”`,he:`תן דוגמה: ”${plain(p.he).slice(0,70)}…“`});});
+  sheet.querySelectorAll("[data-why]").forEach(b=>b.onclick=()=>{const q=d.quiz[+b.dataset.why];
+    askHelper(`Quiz question: ${q.q.en}\nCorrect answer: ${q.o[q.a].en}\nWrong options: ${q.o.filter((_,i)=>i!==q.a).map(o=>o.en).join("; ")}\nExplain why the correct answer is right and why the others are wrong, and give me a tip to remember it.`,
+      {en:`Why is “${q.o[q.a].en}” the answer to: ${q.q.en}`,he:`למה ”${q.o[q.a].he}“ היא התשובה ל: ${q.q.he}`});});
+  let right=0,answered=0;
+  sheet.querySelectorAll(".q").forEach(qel=>{
+    const q=d.quiz[+qel.dataset.q];
+    qel.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(qel.dataset.done)return;qel.dataset.done=1;answered++;
+      const ok=+b.dataset.o===q.a; if(ok)right++;
+      b.classList.add(ok?"right":"wrong");
+      qel.querySelector(`.opt[data-o="${q.a}"]`).classList.add("right");
+      qel.querySelector(".ex").hidden=false;
+      document.getElementById("score").textContent=`${right}/${answered}`;
+    });
+  });
+  document.getElementById("markdone").onclick=()=>{
+    if(done.includes(cur))done=done.filter(x=>x!==cur);else done.push(cur);
+    store.set("rr-done",done);renderDays();renderDay();
+  };
+  renderChips();
+  const n=document.getElementById("next");if(n)n.onclick=()=>{cur++;renderDays();renderDay();window.scrollTo({top:0})};
+}
+function shuffle(a,seed){let s=seed+1;for(let i=a.length-1;i>0;i--){s=(s*9301+49297)%233280;const j=Math.floor(s/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// Timer
+let left=3600,run=null;
+function renderBlocks(){
+  const el=document.getElementById("blocks"),used=3600-left;let acc=0;
+  el.innerHTML=SEGS.map(s=>{const st=acc*60,len=s.m*60;acc+=s.m;const p=Math.max(0,Math.min(1,(used-st)/len));const on=used>=st&&used<st+len&&left>0&&left<3600;
+    return `<div class="blk ${on?"on":""}"><div class="fill" style="width:${p*100}%"></div><span>${s.m}′ ${s.en} · ${s.he}</span></div>`}).join("");
+}
+function tick(){
+  left=Math.max(0,left-1);
+  const m=String(Math.floor(left/60)).padStart(2,"0"),s=String(left%60).padStart(2,"0");
+  document.getElementById("clock").textContent=`${m}:${s}`;renderBlocks();
+  if(left===0){clearInterval(run);run=null;document.getElementById("tstart").textContent="Done! · סיימתם!";}
+}
+document.getElementById("tstart").onclick=e=>{
+  if(left===0)return;
+  if(run){clearInterval(run);run=null;e.target.textContent="Resume · המשך"}
+  else{run=setInterval(tick,1000);e.target.textContent="Pause · השהה"}
+};
+document.getElementById("treset").onclick=()=>{clearInterval(run);run=null;left=3600;document.getElementById("clock").textContent="60:00";document.getElementById("tstart").textContent="Start · התחל";renderBlocks()};
+
+// ---------- Study helper: read aloud + ask Claude ----------
+const ICON={spk:'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></svg>',
+  ask:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>'};
+const plain=s=>s.replace(/<[^>]+>/g,"").replace(/\s+/g," ").trim();
+const isHe=s=>/[֐-׿]/.test(s);
+const tts=("speechSynthesis" in window)?window.speechSynthesis:null;
+let speakingBtn=null;
+function voiceFor(lang){try{return tts.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(lang))||null}catch(e){return null}}
+function stopSpeak(){if(tts)tts.cancel();if(speakingBtn)speakingBtn.classList.remove("speaking");speakingBtn=null}
+function speakParts(parts,btn){
+  if(!tts){helperNote("Reading aloud isn't supported in this browser. · הקראה בקול לא נתמכת בדפדפן הזה.");return}
+  const wasSame=speakingBtn===btn;stopSpeak();if(wasSame&&btn)return; // second tap stops
+  parts=parts.filter(p=>p.text&&p.text.trim());if(!parts.length)return;
+  if(parts.some(p=>p.lang==="he")&&!voiceFor("he"))helperNote("No Hebrew voice is installed on this device, so Hebrew may be read with an English voice. You can add a Hebrew voice in your device's language/speech settings. · לא מותקן קול בעברית במכשיר; אפשר להוסיף אותו בהגדרות השפה והדיבור.");
+  if(btn){btn.classList.add("speaking");speakingBtn=btn}
+  parts.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p.text);u.lang=p.lang==="he"?"he-IL":"en-US";
+    const v=voiceFor(p.lang);if(v)u.voice=v;u.rate=.95;
+    if(i===parts.length-1)u.onend=u.onerror=()=>{if(speakingBtn===btn){btn&&btn.classList.remove("speaking");speakingBtn=null}};
+    tts.speak(u)});
+}
+function speakBi(o,btn){const en={text:plain(o.en),lang:"en"},he={text:plain(o.he),lang:"he"};
+  speakParts(mode==="en"?[en]:mode==="he"?[he]:[en,he],btn)}
+function speakMixed(text,btn){ // split an answer into English / Hebrew runs by line
+  const parts=[];text.split(/\n+/).forEach(line=>{const lang=isHe(line)?"he":"en";const last=parts[parts.length-1];
+    if(last&&last.lang===lang)last.text+=" "+line;else parts.push({text:line,lang})});
+  speakParts(parts,btn)}
+
+const hEl=document.getElementById("helper"),hBody=document.getElementById("h-body"),hInput=document.getElementById("h-input"),
+  hSend=document.getElementById("h-send"),fab=document.getElementById("fab"),hAuto=document.getElementById("h-auto");
+let turns=[],busy=false,ctl=null,samplePromise=null;
+hAuto.checked=store.get("rr-auto",false);hAuto.onchange=()=>store.set("rr-auto",hAuto.checked);
+function getSample(){if(!samplePromise)samplePromise=(window.claude&&claude.use)?claude.use("sample").catch(()=>null):Promise.resolve(null);return samplePromise}
+function openHelper(){hEl.hidden=false;fab.hidden=true;fab.setAttribute("aria-expanded","true");
+  if(!hBody.children.length)greet();setTimeout(()=>hInput.focus(),50)}
+function closeHelper(){hEl.hidden=true;fab.hidden=false;fab.setAttribute("aria-expanded","false");stopSpeak();if(ctl)ctl.abort()}
+fab.onclick=openHelper;document.getElementById("h-close").onclick=closeHelper;document.getElementById("h-stop").onclick=stopSpeak;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!hEl.hidden)closeHelper()});
+
+function addMsg(text,who){const m=document.createElement("div");m.className="msg "+who;m.textContent=text;
+  m.dir=isHe(text)&&!/[A-Za-z]{4}/.test(text.slice(0,40))?"rtl":"auto";hBody.append(m);hBody.scrollTop=hBody.scrollHeight;return m}
+function helperNote(t){if(hEl.hidden)openHelper();const n=addMsg(t,"bot");n.classList.add("h-note")}
+function addReadButton(m,text){const t=document.createElement("div");t.className="tools";
+  const b=document.createElement("button");b.className="mini";b.innerHTML=ICON.spk+" Listen · הקשב";b.onclick=()=>speakMixed(text,b);t.append(b);m.append(t)}
+function greet(){
+  const g=addMsg(mode==="he"?"שלום! אני עוזר הלימוד שלכם. אני יכול להקריא את השיעור בקול, להסביר כל כלל במילים פשוטות, לתת דוגמאות ולבחון אתכם. כתבו שאלה בעברית או באנגלית, או בחרו כפתור למטה."
+   :mode==="en"?"Hi! I'm your study helper. I can read the lesson aloud, explain any rule in simple words, give examples and quiz you. Type a question in English or Hebrew, or pick a button below."
+   :"Hi! I'm your study helper. I can read the lesson aloud, explain any rule simply, give examples and quiz you. Ask in English or Hebrew.\n\nשלום! אני עוזר הלימוד שלכם. אני יכול להקריא, להסביר בפשטות, לתת דוגמאות ולבחון אתכם. שאלו בעברית או באנגלית.","bot");
+  addReadButton(g,g.textContent);
+}
+function renderChips(){const d=DAYS[cur];
+  document.getElementById("h-day").textContent=`Day ${cur+1}: ${d.t.en} · יום ${cur+1}`;
+  const chips=[
+    [{en:"Read today's lesson",he:"הקרא את השיעור"},()=>speakBi({en:d.pts.map(p=>plain(p.en)).join(" "),he:d.pts.map(p=>plain(p.he)).join(" ")},null)],
+    [{en:"Summarize today",he:"סכם את היום"},()=>askHelper("Summarize today's lesson in 5 short bullet points I can memorize, keeping every number.",{en:"Summarize today's lesson",he:"סכם את השיעור של היום"})],
+    [{en:"Quiz me",he:"בחן אותי"},()=>askHelper("Ask me ONE new practice question about today's lesson (not one from the app's quiz). Give 4 options labeled A–D and do not reveal the answer. When I reply, tell me if I'm right and explain.",{en:"Quiz me",he:"בחן אותי"})],
+    [{en:"Memory tricks",he:"טריקים לזיכרון"},()=>askHelper("Give me simple memory tricks for the numbers in today's lesson.",{en:"Memory tricks for today's numbers",he:"טריקים לזכירת המספרים של היום"})]];
+  const el=document.getElementById("h-chips");el.innerHTML="";
+  chips.forEach(([lab,fn])=>{const b=document.createElement("button");b.className="mini";b.type="button";
+    b.textContent=mode==="he"?lab.he:mode==="en"?lab.en:`${lab.en} · ${lab.he}`;b.onclick=fn;el.append(b)});
+}
+function langRule(){return mode==="en"?"Answer in English."
+  :mode==="he"?"Answer in Hebrew (עברית). Keep official names like DCF, DH 680 or 65C-22 as they are."
+  :"Answer in the language the student wrote in. If they wrote in English, give the English answer first and then the same answer in Hebrew under a line that says “בעברית:”. If they wrote in Hebrew, answer in Hebrew first, then English under “In English:”."}
+function context(){const d=DAYS[cur];
+  return `TODAY IS DAY ${cur+1} OF 10: ${d.t.en}\nLesson points:\n${d.pts.map((p,i)=>`${i+1}. ${plain(p.en)}`).join("\n")}\n`
+   +(d.table?`Ratios: ${RATIOS.map(r=>r[0]+" "+r[2]).join(", ")}\n`:"")
+   +`\nKEY FACTS FROM ALL 10 DAYS:\n${DAYS.map((x,i)=>`Day ${i+1} (${x.t.en}): `+x.cards.map(c=>`${c.en} = ${plain(c.he)}`).join("; ")).join("\n")}`}
+function rules(){return `You are a warm, patient study helper inside a study app for the Florida DCF course “Child Care Facility Rules and Regulations” (RNRF). The student is preparing for the course and its competency exam and may be more comfortable in Hebrew than English.
+How to help:
+- Explain in plain, simple words, short sentences. Define any legal or technical term the first time you use it.
+- Base answers on the lesson material below (from Florida Statutes 402.26–402.319, rule 65C-22 F.A.C. and the DCF Child Care Facility Handbook). Keep every number exactly as written there.
+- If a question goes beyond the material, answer from general knowledge but say clearly that the student should confirm it in the DCF handbook or with the instructor. Never invent rule numbers or figures.
+- Keep answers short (under about 180 words per language) unless asked for more. Use plain text with simple “- ” bullets; no markdown headings, bold or tables.
+- ${langRule()}
+- If the student seems confused or stressed, be encouraging and break things into small steps.
+
+${context()}`}
+async function askHelper(prompt,display){
+  if(hEl.hidden)openHelper();
+  if(busy)return;
+  const shown=typeof display==="object"?(mode==="he"?display.he:display.en):(display||prompt);
+  addMsg(shown,"me");
+  const sample=await getSample();
+  if(!sample){helperNote("Asking questions works when this page is opened in Claude. Reading aloud still works here. · שאלות עובדות כשהעמוד פתוח ב-Claude. ההקראה עובדת גם כאן.");return}
+  turns.push({role:"user",content:prompt});
+  if(turns.length>12)turns=turns.slice(-12);while(turns.length&&turns[0].role!=="user")turns.shift();
+  const out=addMsg(mode==="he"?"חושב…":"Thinking… · חושב…","bot");
+  busy=true;hSend.textContent="Stop · עצור";ctl=new AbortController();
+  try{
+    const {text,truncated}=await sample([{role:"user",content:rules()},{role:"assistant",content:"Understood. I'm ready to help."},...turns],
+      {cache:false,signal:ctl.signal,onText:({text})=>{out.textContent=text;out.dir=isHe(text.slice(0,30))?"rtl":"auto";hBody.scrollTop=hBody.scrollHeight}});
+    turns.push({role:"assistant",content:text});
+    out.textContent=text+(truncated?"\n\n(Answer was cut short. Ask a narrower question. · התשובה נקטעה.)":"");
+    addReadButton(out,text);
+    if(hAuto.checked)speakMixed(text,out.querySelector(".mini"));
+  }catch(e){
+    turns.pop();
+    const keep=e&&e.text?e.text+"\n\n":"";
+    const msg={cancelled:"Stopped. · נעצר.",not_granted:"The helper needs your permission to use Claude. Reload the page and choose Allow to ask questions. · יש לאשר שימוש ב-Claude.",
+      sampling_disabled:"Asking Claude isn't available on this account. · לא זמין בחשבון הזה.",rate_limited:"Too many questions at once. Wait a minute and try again. · יותר מדי שאלות; נסו שוב בעוד דקה.",
+      session_expired:"Please sign in to Claude again. · יש להתחבר מחדש.",refused:"I can't help with that question. Try asking it another way. · נסו לנסח אחרת."}[e&&e.code]
+      ||"Something went wrong. Try asking again. · משהו השתבש, נסו שוב.";
+    out.textContent=keep+msg;
+  }finally{busy=false;hSend.textContent="Ask · שאל";ctl=null}
+}
+document.getElementById("h-form").addEventListener("submit",e=>{e.preventDefault();
+  if(busy&&ctl){ctl.abort();return}
+  const q=hInput.value.trim();if(!q)return;hInput.value="";askHelper(q,q)});
+hSend.addEventListener("click",e=>{if(busy&&ctl){e.preventDefault();ctl.abort()}});
+hInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("h-form").requestSubmit()}});
+if(tts&&tts.onvoiceschanged!==undefined)tts.onvoiceschanged=()=>{};
+
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{setMode(b.dataset.m);renderChips()});
+setMode(mode);renderDays();renderDay();renderBlocks();
+</script>

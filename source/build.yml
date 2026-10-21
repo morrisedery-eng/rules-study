@@ -1,0 +1,50 @@
+name: Build Android app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Bundle fonts
+        run: sh fetch-fonts.sh
+
+      - name: Build APK
+        run: gradle assembleRelease --no-daemon
+
+      - name: Rename APK
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk RulesStudy.apk
+          echo "{\"versionCode\": $((100 + GITHUB_RUN_NUMBER)), \"versionName\": \"5.${GITHUB_RUN_NUMBER}\"}" > version.json
+          cat version.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RulesStudy-apk
+          path: RulesStudy.apk
+
+      - name: Publish download page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest RulesStudy.apk version.json \
+            --title "Rules Study app" \
+            --notes "Open this page on your Android phone, tap RulesStudy.apk to download it, then open the file to install."
