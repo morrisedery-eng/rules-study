@@ -135,6 +135,7 @@ exec(open(f"{D}/helper_step.py", encoding="utf-8").read())
 exec(open(f"{D}/nav_step.py", encoding="utf-8").read())
 exec(open(f"{D}/hero_step.py", encoding="utf-8").read())
 exec(open(f"{D}/update_step.py", encoding="utf-8").read())
+exec(open(f"{D}/splash_step.py", encoding="utf-8").read())
 art = s.replace('if(!NB&&!SR)micBtn.hidden=true;', 'micBtn.hidden=true;')
 art = art.replace('<div class="h-row" style="align-items:center;flex-wrap:wrap">\n      <span class="h-note">Mic', '<div class="h-row" hidden style="align-items:center;flex-wrap:wrap">\n      <span class="h-note">Mic')
 art = art.replace('<details class="h-note">\n      <summary>Set up offline voice', '<details class="h-note" hidden>\n      <summary>Set up offline voice')
@@ -267,9 +268,21 @@ w("app/src/main/res/values/themes.xml", """
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#0F7A63</item>
-        <item name="android:navigationBarColor">#0F7A63</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">#161C49</item>
+        <item name="android:navigationBarColor">#161C49</item>
+        <item name="android:windowBackground">#161C49</item>
+    </style>
+</resources>
+""")
+w("app/src/main/res/values-v31/themes.xml", """
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#161C49</item>
+        <item name="android:navigationBarColor">#161C49</item>
+        <item name="android:windowBackground">#161C49</item>
+        <item name="android:windowSplashScreenBackground">#161C49</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
     </style>
 </resources>
 """)
@@ -280,17 +293,37 @@ shutil.copy(f"{D}/rulesstudy.jks", f"{P}/app/rulesstudy.jks")
 w("fetch-fonts.sh", "#!/bin/sh\n# Downloads the app's fonts (IBM Plex Sans, IBM Plex Sans Hebrew, Frank Ruhl Libre; SIL Open Font License) into the app.\n# The app works without them (it falls back to the phone's fonts), but looks best with them.\nset -e\nmkdir -p app/src/main/assets/fonts\ncd app/src/main/assets/fonts\n" + "".join(f"curl -fsSLO {u}\n" for u in FONT_URLS))
 w(".gitignore", ".gradle/\nbuild/\napp/build/\nlocal.properties\n*.iml\n.idea/\n")
 
+def _bez(p0,p1,p2,p3,n=40):
+    return [((1-t)**3*p0[0]+3*(1-t)**2*t*p1[0]+3*(1-t)*t*t*p2[0]+t**3*p3[0],(1-t)**3*p0[1]+3*(1-t)**2*t*p1[1]+3*(1-t)*t*t*p2[1]+t**3*p3[1]) for t in [k/n for k in range(n+1)]]
+def shield_points():
+    # same shield as the app's logo, in a 24x24 box
+    left=_bez((4.5,11.5),(4.5,16.1),(7.6,19.9),(12,21.5)); right=_bez((12,21.5),(16.4,19.9),(19.5,16.1),(19.5,11.5))
+    return [(12,2.5),(4.5,5.5)]+left+right+[(19.5,5.5),(12,2.5)]
+def draw_shield(d, cx, cy, scale, color, width):
+    pts=[(cx+(x-12)*scale, cy+(y-12)*scale) for x,y in shield_points()]
+    d.line(pts, fill=color, width=width, joint="curve")
+    chk=[(cx+(x-12)*scale, cy+(y-12)*scale) for x,y in [(8.5,12),(10.9,14.4),(15.5,9.6)]]
+    d.line(chk, fill=color, width=width, joint="curve")
+    for x,y in chk[::2]+[pts[0]]:
+        r=width/2; d.ellipse([x-r,y-r,x+r,y+r], fill=color)
 def icon(size):
-    im = Image.new("RGB", (size, size), "#0f7a63"); d = ImageDraw.Draw(im); pad = size * .2
-    d.rounded_rectangle([pad, pad * 1.1, size - pad, size - pad * .9], radius=size * .06, fill="#ffffff")
-    d.rounded_rectangle([size * .38, pad * .75, size * .62, pad * 1.35], radius=size * .03, fill="#ffe08a")
-    for y in (.42, .55, .68):
-        d.ellipse([size * .29, size * y - size * .03, size * .35, size * y + size * .03], fill="#0f7a63")
-        d.rounded_rectangle([size * .4, size * y - size * .015, size * .7, size * y + size * .015], radius=max(1, size // 100), fill="#9bb0a9")
-    return im
+    S=1024; im=Image.new("RGB",(S,S),"#161C49"); px=im.load()
+    for y in range(S):            # navy with an indigo glow from the top right, like the app banner
+        for x in range(0,S,1):
+            dx=(S-x)/S; dy=y/S; t=max(0,1-((dx*dx+dy*dy)**.5)/1.05)
+            px[x,y]=(int(22+(61-22)*t),int(28+(72-28)*t),int(73+(200-73)*t))
+    d=ImageDraw.Draw(im); draw_shield(d,S/2,S/2+8,S*0.026,"#FFFFFF",int(S*0.05))
+    return im.resize((size,size),Image.LANCZOS)
+def splash_icon(size=432):
+    S=1296; im=Image.new("RGBA",(S,S),(0,0,0,0)); d=ImageDraw.Draw(im)
+    draw_shield(d,S/2,S/2+10,S*0.016,"#FFFFFF",int(S*0.03))
+    return im.resize((size,size),Image.LANCZOS)
 for name, px in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
     os.makedirs(f"{P}/app/src/main/res/mipmap-{name}", exist_ok=True)
     icon(px).save(f"{P}/app/src/main/res/mipmap-{name}/ic_launcher.png")
+os.makedirs(f"{P}/app/src/main/res/drawable-nodpi", exist_ok=True)
+splash_icon().save(f"{P}/app/src/main/res/drawable-nodpi/splash_icon.png")
+icon(512).save(f"{D}/icon-512.png"); icon(192).save(f"{D}/icon-192.png")
 
 z = f"{D}/RulesStudy-android-project.zip"
 if os.path.exists(z): os.remove(z)
