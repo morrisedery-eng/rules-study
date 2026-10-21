@@ -19,6 +19,7 @@ MENU = '''<div class="menu-pop" id="menu-pop" role="menu" hidden>
   <button type="button" role="menuitem" data-go="tab-exam"></button>
   <button type="button" role="menuitem" data-go="tab-helper"></button>
   <button type="button" role="menuitem" data-go="tab-settings"></button>
+  <button type="button" role="menuitem" class="mi-exit" id="mi-exit" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></svg><span class="mi-t"><span class="en">Exit app</span><span class="he" lang="he">יציאה מהאפליקציה</span></span></button>
 </div>
 '''
 rep('<nav class="tabbar"', MENU + '<nav class="tabbar"')
@@ -29,6 +30,8 @@ MENU_JS = r'''
   pop.querySelectorAll("[data-go]").forEach(b=>{const t=document.getElementById(b.dataset.go);
     b.innerHTML=t.querySelector("svg").outerHTML+`<span class="mi-t"><span class="en">${t.querySelector(".en").textContent}</span><span class="he" lang="he">${t.querySelector(".he").textContent}</span></span>`;
     b.onclick=()=>{close();t.click()}});
+  const ex=document.getElementById("mi-exit"),NBx=window.AndroidBridge;
+  if(NBx&&typeof NBx.exitApp==="function"){ex.hidden=false;ex.onclick=()=>{close();try{stopSpeak()}catch(e){}NBx.exitApp()}} // only in the installed app
   const close=()=>{if(pop.hidden)return;pop.hidden=true;if(opener){opener.setAttribute("aria-expanded","false");opener=null}};
   const open=btn=>{opener=btn;btn.setAttribute("aria-expanded","true");pop.hidden=false;
     const r=btn.getBoundingClientRect();pop.style.top=(r.bottom+8)+"px";pop.style.right=Math.max(12,innerWidth-r.right)+"px";pop.querySelector("button").focus()};
@@ -41,6 +44,8 @@ rep('// ----- Bottom navigation -----', MENU_JS + '// ----- Bottom navigation --
 
 MENU_CSS = r'''
 /* top-right menu */
+.menu-pop .mi-exit{margin-top:4px;border-top:1px solid var(--line);border-radius:0 0 12px 12px;padding-top:14px}
+.menu-pop .mi-exit:hover,.menu-pop .mi-exit:focus-visible{background:var(--no-soft);color:var(--no)}
 .burger{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;cursor:pointer;flex:none;
   border:1px solid var(--line);background:var(--sheet);color:var(--ink)}
 .burger svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}

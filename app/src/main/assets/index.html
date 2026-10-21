@@ -629,6 +629,8 @@ body.m-both .hero-text p.he{margin-top:-2px}
 .blocks>*{text-align:left;justify-content:flex-start;align-items:center}
 
 /* top-right menu */
+.menu-pop .mi-exit{margin-top:4px;border-top:1px solid var(--line);border-radius:0 0 12px 12px;padding-top:14px}
+.menu-pop .mi-exit:hover,.menu-pop .mi-exit:focus-visible{background:var(--no-soft);color:var(--no)}
 .burger{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;cursor:pointer;flex:none;
   border:1px solid var(--line);background:var(--sheet);color:var(--ink)}
 .burger svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -650,6 +652,33 @@ body.m-both .hero-text p.he{margin-top:-2px}
 .menu-pop button:hover .mi-t .he{color:inherit}
 body.m-en .menu-pop .mi-t .he,body.m-he .menu-pop .mi-t .en{display:none}
 body.m-he .menu-pop .mi-t .he{font-size:1rem;font-weight:500;color:inherit}
+
+/* ===== screens ===== */
+body[data-screen="home"] .timer,body[data-screen="home"] #sheet{display:none!important}
+body:not([data-screen="home"]) .hero,body:not([data-screen="home"]) .subjects,body:not([data-screen="home"]) #upd-banner{display:none!important}
+body[data-screen="exam"] .timer,body[data-screen="settings"] .timer,body[data-screen="settings"] #sheet,body[data-screen="quiz"] .timer{display:none!important}
+body[data-screen="quiz"] #sheet>:not(#part-3):not(#donebox){display:none!important}
+/* top bar with Back: stays at the top while scrolling */
+.appbar{position:sticky;top:0;z-index:40;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+  margin:0 calc(50% - 50vw) 4px;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,calc(50vw - 50%)) 10px;
+  background:var(--bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.ab-back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px 0 10px;border-radius:14px;border:1px solid var(--line);
+  background:var(--sheet);color:var(--accent);font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.ab-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ab-back:hover{background:var(--accent-soft)}
+.ab-back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ab-title{font-weight:600;font-size:1rem;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-title>span{display:inline}
+.ab-title>span.he{margin-left:.5em;color:var(--muted);font-weight:500}
+body.m-en .ab-title .he,body.m-he .ab-title .en{display:none}
+body.m-he .ab-title>span.he{margin:0;color:var(--ink)}
+/* lesson overlay header: Back on the left */
+#coach .c-head{flex-wrap:wrap;row-gap:8px}
+#coach .c-left{display:contents}
+#coach .c-left .ab-back{order:0}
+#coach .c-right{order:1;margin-left:auto}
+#coach .c-left .label{order:2;flex-basis:100%}
+#c-close{display:none!important}
 </style>
 
 <div id="splash" role="img" aria-label="Rules Study · Florida DCF">
@@ -667,7 +696,8 @@ body.m-he .menu-pop .mi-t .he{font-size:1rem;font-weight:500;color:inherit}
 </head>
 <body>
 <div class="wrap">
-  <div class="upd-banner" id="upd-banner" hidden></div>
+  <div class="appbar" id="appbar" hidden><button type="button" class="ab-back" id="ab-back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back · חזרה</span></button><span class="ab-title" id="ab-title"></span><button type="button" class="burger" aria-label="Menu · תפריט" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+<div class="upd-banner" id="upd-banner" hidden></div>
   <header class="hero">
     <svg class="hero-art" viewBox="0 0 300 300" aria-hidden="true"><circle cx="210" cy="70" r="46"/><rect x="88" y="34" width="70" height="70" rx="14" transform="rotate(14 123 69)"/><path d="M232 150 282 236H182z"/><path d="M96 190a52 52 0 0 1 104 0z"/><rect x="40" y="128" width="40" height="40" rx="10" transform="rotate(-12 60 148)"/></svg>
     <div class="hero-top">
@@ -739,7 +769,7 @@ body.m-he .menu-pop .mi-t .he{font-size:1rem;font-weight:500;color:inherit}
 
 <section id="coach" hidden aria-label="Guided lesson">
   <div class="c-top">
-    <div class="c-head"><span class="label" id="c-part"></span><div class="c-right"><div class="c-clock" id="c-clock">60:00</div><button type="button" class="burger" aria-label="Menu · תפריט" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></div>
+    <div class="c-head"><div class="c-left"><button type="button" class="ab-back" id="c-exit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back · חזרה</span></button><span class="label" id="c-part"></span></div><div class="c-right"><div class="c-clock" id="c-clock">60:00</div><button type="button" class="burger" aria-label="Menu · תפריט" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></div>
     <div class="c-ctl">
       <button type="button" class="mini" id="c-pause">⏸ Pause · השהה</button>
       <button type="button" class="mini" id="c-skip">Next part · החלק הבא</button>
@@ -755,6 +785,7 @@ body.m-he .menu-pop .mi-t .he{font-size:1rem;font-weight:500;color:inherit}
   <button type="button" role="menuitem" data-go="tab-exam"></button>
   <button type="button" role="menuitem" data-go="tab-helper"></button>
   <button type="button" role="menuitem" data-go="tab-settings"></button>
+  <button type="button" role="menuitem" class="mi-exit" id="mi-exit" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></svg><span class="mi-t"><span class="en">Exit app</span><span class="he" lang="he">יציאה מהאפליקציה</span></span></button>
 </div>
 <nav class="tabbar" aria-label="Main"><button type="button" class="tab" id="tab-subjects"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="en">Subjects</span><span class="he" lang="he">נושאים</span></button><button type="button" class="tab" id="tab-exam"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="m9 13 2 2 4-4"/></svg><span class="en">Practice exam</span><span class="he" lang="he">מבחן תרגול</span></button><button type="button" class="tab" id="tab-helper"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h6"/></svg><span class="en">Helper</span><span class="he" lang="he">עוזר</span></button><button type="button" class="tab" id="tab-settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span class="en">Settings</span><span class="he" lang="he">הגדרות</span></button></nav>
 <button class="fab" id="fab" aria-controls="helper" aria-expanded="false">
@@ -2447,6 +2478,8 @@ function heroUpdate(){const n=done.length,N=DAYS.length,pct=Math.round(n/N*100);
   pop.querySelectorAll("[data-go]").forEach(b=>{const t=document.getElementById(b.dataset.go);
     b.innerHTML=t.querySelector("svg").outerHTML+`<span class="mi-t"><span class="en">${t.querySelector(".en").textContent}</span><span class="he" lang="he">${t.querySelector(".he").textContent}</span></span>`;
     b.onclick=()=>{close();t.click()}});
+  const ex=document.getElementById("mi-exit"),NBx=window.AndroidBridge;
+  if(NBx&&typeof NBx.exitApp==="function"){ex.hidden=false;ex.onclick=()=>{close();try{stopSpeak()}catch(e){}NBx.exitApp()}} // only in the installed app
   const close=()=>{if(pop.hidden)return;pop.hidden=true;if(opener){opener.setAttribute("aria-expanded","false");opener=null}};
   const open=btn=>{opener=btn;btn.setAttribute("aria-expanded","true");pop.hidden=false;
     const r=btn.getBoundingClientRect();pop.style.top=(r.bottom+8)+"px";pop.style.right=Math.max(12,innerWidth-r.right)+"px";pop.querySelector("button").focus()};
@@ -2454,6 +2487,38 @@ function heroUpdate(){const n=done.length,N=DAYS.length,pct=Math.round(n/N*100);
   document.addEventListener("click",e=>{if(!pop.contains(e.target))close()});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
   addEventListener("resize",close);addEventListener("scroll",close,{passive:true});}
+
+// ----- Screens with Back -----
+{const body=document.body,bar=document.getElementById("appbar"),ttl=document.getElementById("ab-title"),setSec=document.getElementById("settings");
+  let stack=["home"];
+  const title=sc=>sc==="subject"?bi(B(`Subject ${cur+1} of ${DAYS.length}`,`נושא ${cur+1} מתוך ${DAYS.length}`),"span")
+    :sc==="quiz"?bi(B("Quiz","בוחן"),"span"):sc==="exam"?bi(B("Practice exam","מבחן תרגול"),"span"):sc==="settings"?bi(B("Settings","הגדרות"),"span"):"";
+  function paint(){const sc=stack[stack.length-1];body.dataset.screen=sc;bar.hidden=sc==="home";ttl.innerHTML=title(sc);
+    if(sc!=="settings"&&!setSec.hidden){setSec.hidden=true;const t=document.getElementById("tab-settings");if(t)t.setAttribute("aria-expanded","false")}
+    if(sc==="subject"&&!document.getElementById("part-0"))renderDay(); // the page still held the practice exam
+    window.scrollTo({top:0})}
+  function show(sc){if(sc==="home")stack=["home"];else if(stack[stack.length-1]!==sc){if(sc!=="quiz")stack=stack.filter(x=>x!==sc&&x!=="quiz");stack.push(sc)}paint()}
+  function back(){if(stack.length>1)stack.pop();if(stack[stack.length-1]==="quiz")stack.pop();paint()}
+  window.showScreen=show;window.screenBack=back;
+  document.getElementById("ab-back").onclick=back;
+  document.getElementById("c-exit").onclick=()=>closeCoach();
+  // what opens which screen
+  const _exam=startExam;startExam=function(){_exam.apply(this,arguments);show("exam")};
+  const _quiz=startDayQuiz;startDayQuiz=function(){_quiz.apply(this,arguments);if(document.getElementById("part-3"))show("quiz")};
+  document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;
+    if(t.classList.contains("daytab"))show("subject");
+    else if(t.id==="hn-go"&&document.getElementById("part-0"))show("subject");
+    else if(t.id==="tab-subjects"||t.id==="qnextday")show("home");
+    else if(t.id==="exam-back")back();
+    else if(/^Open Subject|^Next subject/.test(t.textContent)){if(stack[stack.length-1]==="quiz")stack.pop();show("subject")}});
+  new MutationObserver(()=>{if(!setSec.hidden)show("settings");else if(stack[stack.length-1]==="settings")back()}).observe(setSec,{attributes:true,attributeFilter:["hidden"]});
+  // the Android back button: close what is open first, then go back one screen
+  window.onNativeBack=()=>{const pop=document.getElementById("menu-pop");
+    if(pop&&!pop.hidden){pop.hidden=true;return true}
+    if(!hEl.hidden){closeHelper();return true}
+    if(typeof coach!=="undefined"&&coach.open){closeCoach();return true}
+    if(stack.length>1){back();return true}return false};
+  body.dataset.screen="home";}
 // ----- Bottom navigation -----
 {const go=el=>{const t=document.getElementById(el);if(t)t.scrollIntoView({behavior:"smooth",block:"start"})};
   const leaveLesson=()=>{if(typeof coach!=="undefined"&&coach.open)closeCoach()}; // the lesson timer keeps running; "Open lesson" brings it back

@@ -95,6 +95,7 @@ class MainActivity : Activity() {
         @JavascriptInterface fun appVersion(): String = currentVersion().toString()
         @JavascriptInterface fun checkUpdate() = checkForUpdate()
         @JavascriptInterface fun installUpdate() = runOnUiThread { downloadUpdate() }
+        @JavascriptInterface fun exitApp() = runOnUiThread { tts?.stop(); finishAndRemoveTask() }
     }
 
     // ---------- Reading aloud ----------
